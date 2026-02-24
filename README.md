@@ -1,2 +1,3 @@
 # Backend_Learning
-Learning backend to upskill myself
+Learning backend development by  practicing core concepts.
+ 
