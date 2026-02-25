@@ -1,6 +1,8 @@
 import { validationResult } from "express-validator";
 import { ApiError } from "../utils/api-error.js";
+import jwt from "jsonwebtoken";
 
+const ACCESS_TOKEN_SECRET = process.env.ACCESS_TOKEN_SECRET || 'access_secret';
 
 export const validate = (req, res, next) => {
   const errors = validationResult(req);
@@ -15,9 +17,6 @@ export const validate = (req, res, next) => {
   );
   next(new ApiError(422, "Received data is not valid", extractedErrors));
 };
-
-import jwt from "jsonwebtoken";
-const ACCESS_TOKEN_SECRET = process.env.ACCESS_TOKEN_SECRET || 'access_secret';
 
 export const verifyJWT = (req, res, next) => {
   const authHeader = req.headers.authorization;

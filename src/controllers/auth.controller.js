@@ -4,10 +4,12 @@ import { ApiError } from "../utils/api-error.js";
 import { asyncHandler } from "../utils/async-handler.js";
 import {
   emailVerificationmailgenContent,
+  forgotPasswordMailgenContent,
   sendEmail,
 } from "../utils/mail.js";
 import { generateAccessAndRefereshTokens } from "../utils/token.js";
 import jwt from "jsonwebtoken";
+import crypto from "crypto";
 
 const registerUser = asyncHandler(async (req, res) => {
   console.log("Register request:", req.body);
@@ -181,7 +183,7 @@ const verifyEmail = asyncHandler(async (req,res) => {
   user.emailVerificationToken = undefined;
   user.emailVerificationExpiry = undefined;
 
-  user.isEmailVerified = "true"
+  user.isEmailVerified = true
   await user.save({validateBeforeSave: false})
 
   return res
@@ -310,10 +312,9 @@ const forgotPasswordRequest = asyncHandler (async (req,res) =>
   await sendEmail({
     email: user.email,
     subject: "Password reset request",
-    mailgenContent: forgotPasswordmailgenContent(
+    mailgenContent: forgotPasswordMailgenContent(
       user.username,
-      `${process.env.FORGOT_PASSWORD_REDIRECT_URL}/4
-      {unHashedToken}`,
+      `${process.env.FORGOT_PASSWORD_REDIRECT_URL}/${unHashedToken}`,
     ),
   });
 
