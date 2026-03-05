@@ -6,20 +6,14 @@ dotenv.config({
 });
 
 
-const port = process.env.PORT ||3000;
+const port = process.env.PORT || 3000;
 
+// Try to connect to MongoDB, but don't block server startup
+connectDB();
 
-connectDB()
-  .then(() => {
-    app.listen(port, () => {
-      console.log(`Example app listening on port http://localhost:${port}`);
-      
-    })
-  })
-  .catch((err) => {
-    console.error("MongoDB connection error", err)
-    process.exit(1);
-  })
+app.listen(port, () => {
+  console.log(`🚀 Server running at http://localhost:${port}`);
+});
 
 
  
