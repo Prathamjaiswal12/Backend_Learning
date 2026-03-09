@@ -9,32 +9,62 @@ import { UserRolesEnum } from "../utils/constants.js";
 
 
 const getProjects = asyncHandler(async (req,res) => {
-   const {name, description} =  req.body
-
-  const project =  await Project.create({
-     name,
-     description,
-     createdBy: new mongoose.Types.ObjectId(req.user._id),
-   });
-
-   await ProjectMember.create(
+   const projects =  await ProjectMember.aggregate(
+   [
     {
-    user: new mongoose.Types.ObjectId(req.user._id),
-    project: new mongoose.Types.ObjectId(project._id),
-    role: UserRolesEnum.ADMIN
+        $match: {
+            user: new mongoose.Types.ObjectId(req.user._id),
+
+        },
+    },
+    {
+        $lookup: {
+            from: "projects",
+            localField: "projects",
+            foreignField: "_id",
+            as: "projects",
+            pipeline: [
+                {
+                    $lookup: {
+                        from: "projectmembers",
+                        localField: "_id",
+                        foreignField: "projects",
+                        as: "projectmembers"
+                    },
+                },
+                {
+                    $addFields: {
+                        members: {
+                            $size: "$projectmembers",
+                        },
+                    },
+                },
+            ],
+        },
+    },
+    {
+        $unwind: "$project"
+    },
+    {
+        $project: {
+            project: {
+                _id: 1,
+                name: 1,
+                description: 1,
+                members: 1,
+                createdAt: 1,
+                createdBy: 1
+            },
+            role: 1,
+            _id: 0
+        }
+    },
+]);
+   return res
+    .status(200)
+    .json(new ApiResponse(200, projects, "Projects fetched successfully"));
 });
 
-  return res
-   .status(201)
-   .json(
-     new ApiResponse(
-        201,
-        project,
-        "Project created successfully"
-     )
-   )
-
-});
 
 const getProjectById = asyncHandler(async (req,res) => {
     //test
